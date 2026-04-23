@@ -8,7 +8,6 @@ OUT_PATH = "embeddings.json"
 def main():
     df = pd.read_csv(CSV_PATH)
 
-    # Varmista sarakenimet: nimi, kuvaus
     if "nimi" not in df.columns or "kuvaus" not in df.columns:
         raise ValueError("CSV:stä puuttuu sarake 'nimi' tai 'kuvaus'")
 
@@ -18,10 +17,9 @@ def main():
 
     model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 
-    texts = df["kuvaus"].tolist()
     names = df["nimi"].tolist()
+    texts = df["kuvaus"].tolist()
 
-    # normalize_embeddings=True -> cosine similarity = dot product (kun normit 1)
     embeddings = model.encode(texts, normalize_embeddings=True)
 
     payload = {
@@ -29,8 +27,8 @@ def main():
         "dim": int(embeddings.shape[1]),
         "count": int(embeddings.shape[0]),
         "items": [
-            {"nimi": n, "emb": emb.tolist()}
-            for n, emb in zip(names, embeddings)
+            {"nimi": n, "kuvaus": t, "emb": emb.tolist()}
+            for n, t, emb in zip(names, texts, embeddings)
         ],
     }
 
